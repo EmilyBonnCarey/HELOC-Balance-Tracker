@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HELOC Balance Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .goal-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .goal-card.span-row {
+            grid-column: span 1;
+        }
+
+        @media (max-width: 900px) {
+            .goal-section {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .goal-card {
+            text-align: center;
+        }
+
+        .goal-card .label {
+            font-size: 14px;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+
+        .goal-card .value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .goal-card .value.negative {
+            color: #28a745;
+        }
+
+        .goal-card .value.positive {
+            color: #dc3545;
+        }
+
+        .input-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .input-section h2 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 20px;
+        }
+
+        .input-form {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            resize: vertical;
+            min-height: 60px;
+            font-family: inherit;
+        }
+
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group.full-width {
+            flex: 1 1 100%;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .table-section {
+            margin-top: 30px;
+        }
+
+        .table-section h2 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 20px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+        }
+
+        th {
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #e0e0e0;
+            transition: background-color 0.2s;
+        }
+
+        tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        td {
+            font-size: 15px;
+            color: #333;
+        }
+
+        .positive {
+            color: #dc3545;
+        }
+
+        .negative {
+            color: #28a745;
+        }
+
+        .edit-btn {
+            background: #ffc107;
+            color: #333;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-right: 5px;
+        }
+
+        .edit-btn:hover {
+            background: #e0a800;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .notes-cell {
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-style: italic;
+            color: #6c757d;
+        }
+
+        .cancel-btn {
+            background: #6c757d;
+            margin-left: 10px;
+        }
+
+        .cancel-btn:hover {
+            background: #5a6268;
+        }
+
+        .spending-builder {
+            background: #fff;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+
+        .spending-input-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: flex-end;
+        }
+
+        .spending-input-row select,
+        .spending-input-row input {
+            padding: 8px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .spending-input-row select {
+            flex: 2;
+        }
+
+        .spending-input-row input {
+            flex: 1;
+        }
+
+        .add-item-btn {
+            padding: 8px 16px;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .spending-list {
+            margin-top: 10px;
+        }
+
+        .spending-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            margin-bottom: 6px;
+        }
+
+        .spending-item-text {
+            font-size: 14px;
+            color: #333;
+        }
+
+        .remove-item-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .remove-item-btn:hover {
+            background: #c82333;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .category-management {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .category-management h3 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .category-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .category-tag {
+            background: white;
+            border: 2px solid #667eea;
+            color: #667eea;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .category-tag button {
+            background: none;
+            border: none;
+            color: #dc3545;
+            cursor: pointer;
+            padding: 0;
+            font-size: 16px;
+            line-height: 1;
+            margin: 0;
+        }
+
+        .category-tag button:hover {
+            transform: none;
+            box-shadow: none;
+            color: #c82333;
+        }
+
+        .add-category-form {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .add-category-form input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .add-category-form button {
+            padding: 8px 16px;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .toggle-categories-btn {
+            background: #6c757d;
+            padding: 8px 16px;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+
+        .empty-state p {
+            font-size: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                border-radius: 0;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .goal-section {
+                grid-template-columns: 1fr;
+            }
+
+            .input-form {
+                flex-direction: column;
+            }
+
+            th, td {
+                padding: 10px 8px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>HELOC Balance Tracker</h1>
+            <p>Track your progress toward paying down $1,000/month</p>
+        </div>
+
+        <div class="content">
+            <div class="input-section" style="margin-bottom: 20px;">
+                <h2>Loan Settings</h2>
+                <div style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+                    <div class="form-group" style="flex: 1; min-width: 200px;">
+                        <label for="startingBalance">Starting Loan Balance ($)</label>
+                        <input type="number" id="startingBalance" step="0.01" placeholder="e.g., 275000.00">
+                    </div>
+                    <button type="button" id="saveStartingBalance">Save Starting Balance</button>
+                </div>
+            </div>
+
+            <div class="goal-section">
+                <div class="goal-card">
+                    <div class="label">Starting Balance</div>
+                    <div class="value" id="startingBalanceDisplay">-</div>
+                </div>
+                <div class="goal-card">
+                    <div class="label">Current Balance</div>
+                    <div class="value" id="currentBalance">-</div>
+                </div>
+                <div class="goal-card">
+                    <div class="label">Total Equity Built</div>
+                    <div class="value negative" id="equityBuilt">-</div>
+                </div>
+                <div class="goal-card">
+                    <div class="label">Equity This Month</div>
+                    <div class="value" id="monthChange">-</div>
+                </div>
+                <div class="goal-card">
+                    <div class="label">Monthly Goal ($1K)</div>
+                    <div class="value" id="goalProgress">-</div>
+                </div>
+            </div>
+
+            <div class="category-management" id="categoryManagement" style="display: none;">
+                <h3>Manage Spending Categories</h3>
+                <div class="category-list" id="categoryList"></div>
+                <div class="add-category-form">
+                    <input type="text" id="newCategoryInput" placeholder="Enter new category name">
+                    <button type="button" id="addCategoryBtn">Add Category</button>
+                </div>
+            </div>
+
+            <div class="input-section">
+                <button type="button" class="toggle-categories-btn" id="toggleCategoriesBtn">Manage Categories</button>
+                <h2 id="formTitle">Add New Entry</h2>
+                <form class="input-form" id="entryForm">
+                    <div class="form-group">
+                        <label for="date">Date</label>
+                        <input type="date" id="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="balance">Balance ($)</label>
+                        <input type="number" id="balance" step="0.01" placeholder="e.g., 50000.00" required>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="notes">Notes (optional)</label>
+                        <textarea id="notes" placeholder="What was spent today? e.g., Home repairs, credit card payment, etc."></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Daily Spending Breakdown (optional)</label>
+                        <div class="spending-builder">
+                            <div class="spending-input-row">
+                                <select id="spendingCategory">
+                                    <option value="">Select category...</option>
+                                </select>
+                                <input type="number" id="spendingAmount" step="0.01" placeholder="Amount">
+                                <button type="button" class="add-item-btn" id="addSpendingItem">Add Item</button>
+                            </div>
+                            <div class="spending-list" id="spendingList"></div>
+                        </div>
+                    </div>
+                    <button type="submit" id="submitBtn">Add Entry</button>
+                    <button type="button" class="cancel-btn" id="cancelBtn" style="display: none;">Cancel</button>
+                </form>
+            </div>
+
+            <div class="table-section">
+                <h2>Balance History</h2>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Balance</th>
+                                <th>Daily Change</th>
+                                <th>Month-to-Date</th>
+                                <th>Notes</th>
+                                <th>Spending Breakdown</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <tr class="empty-state">
+                                <td colspan="7">
+                                    <p>No entries yet. Add your first balance entry above!</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize
+        let entries = JSON.parse(localStorage.getItem('helocEntries')) || [];
+        let editingIndex = null;
+        let startingBalance = parseFloat(localStorage.getItem('helocStartingBalance')) || 0;
+
+        // Default categories
+        const defaultCategories = [
+            'Groceries',
+            'Gas',
+            'Restaurant',
+            'Shopping',
+            'Water Bill',
+            'Internet Bill',
+            'Truck Payment',
+            'Interest Only Payment',
+            'Credit Card Payment',
+            'Home Repairs',
+            'Other'
+        ];
+
+        let categories = JSON.parse(localStorage.getItem('helocCategories')) || defaultCategories;
+        let currentSpendingItems = [];
+
+        // Set today's date as default
+        document.getElementById('date').valueAsDate = new Date();
+
+        // Load starting balance into input field
+        if (startingBalance > 0) {
+            document.getElementById('startingBalance').value = startingBalance;
+        }
+
+        // Save starting balance button
+        document.getElementById('saveStartingBalance').addEventListener('click', function() {
+            const value = parseFloat(document.getElementById('startingBalance').value);
+            if (value && value > 0) {
+                startingBalance = value;
+                localStorage.setItem('helocStartingBalance', startingBalance);
+                updateGoalCards();
+                alert('Starting balance saved successfully!');
+            } else {
+                alert('Please enter a valid starting balance.');
+            }
+        });
+
+        // Category management
+        renderCategories();
+        renderCategoryDropdown();
+
+        document.getElementById('toggleCategoriesBtn').addEventListener('click', function() {
+            const mgmt = document.getElementById('categoryManagement');
+            mgmt.style.display = mgmt.style.display === 'none' ? 'block' : 'none';
+        });
+
+        document.getElementById('addCategoryBtn').addEventListener('click', function() {
+            const input = document.getElementById('newCategoryInput');
+            const newCategory = input.value.trim();
+            if (newCategory && !categories.includes(newCategory)) {
+                categories.push(newCategory);
+                localStorage.setItem('helocCategories', JSON.stringify(categories));
+                renderCategories();
+                renderCategoryDropdown();
+                input.value = '';
+            } else if (categories.includes(newCategory)) {
+                alert('Category already exists!');
+            } else {
+                alert('Please enter a category name.');
+            }
+        });
+
+        // Handle category dropdown change
+        document.getElementById('spendingCategory').addEventListener('change', function() {
+            if (this.value === '__ADD_NEW__') {
+                const newCategory = prompt('Enter new category name:');
+                if (newCategory && newCategory.trim()) {
+                    const trimmedCategory = newCategory.trim();
+                    if (!categories.includes(trimmedCategory)) {
+                        categories.push(trimmedCategory);
+                        localStorage.setItem('helocCategories', JSON.stringify(categories));
+                        renderCategories();
+                        renderCategoryDropdown();
+                        // Select the newly added category
+                        document.getElementById('spendingCategory').value = trimmedCategory;
+                    } else {
+                        alert('Category already exists!');
+                        this.value = '';
+                    }
+                } else {
+                    this.value = '';
+                }
+            }
+        });
+
+        // Spending breakdown builder
+        document.getElementById('addSpendingItem').addEventListener('click', function() {
+            const category = document.getElementById('spendingCategory').value;
+            const amount = parseFloat(document.getElementById('spendingAmount').value);
+
+            if (category && category !== '__ADD_NEW__' && amount && amount > 0) {
+                currentSpendingItems.push({ category, amount });
+                renderSpendingList();
+                document.getElementById('spendingCategory').value = '';
+                document.getElementById('spendingAmount').value = '';
+            } else {
+                alert('Please select a category and enter a valid amount.');
+            }
+        });
+
+        // Cancel button
+        document.getElementById('cancelBtn').addEventListener('click', function() {
+            cancelEdit();
+        });
+
+        // Form submission
+        document.getElementById('entryForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const date = document.getElementById('date').value;
+            const balance = parseFloat(document.getElementById('balance').value);
+            const notes = document.getElementById('notes').value.trim();
+            const spending = [...currentSpendingItems]; // Copy current spending items
+
+            if (editingIndex !== null) {
+                // Update existing entry
+                entries[editingIndex] = { date, balance, notes, spending };
+                editingIndex = null;
+                document.getElementById('formTitle').textContent = 'Add New Entry';
+                document.getElementById('submitBtn').textContent = 'Add Entry';
+                document.getElementById('cancelBtn').style.display = 'none';
+            } else {
+                // Check if date already exists
+                if (entries.some(entry => entry.date === date)) {
+                    if (!confirm('An entry for this date already exists. Do you want to replace it?')) {
+                        return;
+                    }
+                    entries = entries.filter(entry => entry.date !== date);
+                }
+
+                entries.push({ date, balance, notes, spending });
+            }
+
+            entries.sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort by date, newest first
+
+            localStorage.setItem('helocEntries', JSON.stringify(entries));
+
+            // Reset form
+            document.getElementById('balance').value = '';
+            document.getElementById('notes').value = '';
+            currentSpendingItems = [];
+            renderSpendingList();
+            document.getElementById('date').valueAsDate = new Date();
+
+            renderTable();
+            updateGoalCards();
+        });
+
+        function cancelEdit() {
+            editingIndex = null;
+            document.getElementById('formTitle').textContent = 'Add New Entry';
+            document.getElementById('submitBtn').textContent = 'Add Entry';
+            document.getElementById('cancelBtn').style.display = 'none';
+            document.getElementById('balance').value = '';
+            document.getElementById('notes').value = '';
+            currentSpendingItems = [];
+            renderSpendingList();
+            document.getElementById('date').valueAsDate = new Date();
+        }
+
+        function editEntry(index) {
+            editingIndex = index;
+            const entry = entries[index];
+
+            document.getElementById('date').value = entry.date;
+            document.getElementById('balance').value = entry.balance;
+            document.getElementById('notes').value = entry.notes || '';
+
+            // Load spending items
+            currentSpendingItems = Array.isArray(entry.spending) ? [...entry.spending] : [];
+            renderSpendingList();
+
+            document.getElementById('formTitle').textContent = 'Edit Entry';
+            document.getElementById('submitBtn').textContent = 'Update Entry';
+            document.getElementById('cancelBtn').style.display = 'inline-block';
+
+            // Scroll to form
+            document.getElementById('entryForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function renderCategories() {
+            const list = document.getElementById('categoryList');
+            list.innerHTML = categories.map(cat => `
+                <div class="category-tag">
+                    ${cat}
+                    <button onclick="deleteCategory('${cat}')">&times;</button>
+                </div>
+            `).join('');
+        }
+
+        function renderCategoryDropdown() {
+            const dropdown = document.getElementById('spendingCategory');
+            dropdown.innerHTML = '<option value="">Select category...</option>' +
+                categories.map(cat => `<option value="${cat}">${cat}</option>`).join('') +
+                '<option value="__ADD_NEW__">➕ Add New Category...</option>';
+        }
+
+        function renderSpendingList() {
+            const list = document.getElementById('spendingList');
+            if (currentSpendingItems.length === 0) {
+                list.innerHTML = '';
+                return;
+            }
+
+            list.innerHTML = currentSpendingItems.map((item, index) => `
+                <div class="spending-item">
+                    <span class="spending-item-text">${item.category}: ${formatCurrency(item.amount)}</span>
+                    <button type="button" class="remove-item-btn" onclick="removeSpendingItem(${index})">Remove</button>
+                </div>
+            `).join('');
+        }
+
+        function removeSpendingItem(index) {
+            currentSpendingItems.splice(index, 1);
+            renderSpendingList();
+        }
+
+        function deleteCategory(category) {
+            if (confirm(`Are you sure you want to delete the category "${category}"?`)) {
+                categories = categories.filter(cat => cat !== category);
+                localStorage.setItem('helocCategories', JSON.stringify(categories));
+                renderCategories();
+                renderCategoryDropdown();
+            }
+        }
+
+        function deleteEntry(index) {
+            if (confirm('Are you sure you want to delete this entry?')) {
+                entries.splice(index, 1);
+                localStorage.setItem('helocEntries', JSON.stringify(entries));
+                renderTable();
+                updateGoalCards();
+            }
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 2
+            }).format(amount);
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString + 'T00:00:00');
+            return date.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+        }
+
+        function getMonthStart(dateString) {
+            const date = new Date(dateString + 'T00:00:00');
+            return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-01`;
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+
+            if (entries.length === 0) {
+                tbody.innerHTML = `
+                    <tr class="empty-state">
+                        <td colspan="7">
+                            <p>No entries yet. Add your first balance entry above!</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = entries.map((entry, index) => {
+                const prevEntry = entries[index + 1];
+                const dailyChange = prevEntry ? entry.balance - prevEntry.balance : 0;
+
+                // Find first entry of the month
+                const monthStart = getMonthStart(entry.date);
+                const monthEntries = entries.filter(e => getMonthStart(e.date) === monthStart);
+                const firstMonthEntry = monthEntries[monthEntries.length - 1];
+                const monthChange = firstMonthEntry && firstMonthEntry.date !== entry.date
+                    ? entry.balance - firstMonthEntry.balance
+                    : 0;
+
+                const dailyClass = dailyChange > 0 ? 'positive' : dailyChange < 0 ? 'negative' : '';
+                const monthClass = monthChange > 0 ? 'positive' : monthChange < 0 ? 'negative' : '';
+                const notesDisplay = entry.notes ? `<span class="notes-cell" title="${entry.notes}">${entry.notes}</span>` : '<span style="color: #ccc;">-</span>';
+
+                // Format spending display
+                let spendingDisplay = '<span style="color: #ccc;">-</span>';
+                if (Array.isArray(entry.spending) && entry.spending.length > 0) {
+                    const spendingText = entry.spending.map(item => `${item.category}: ${formatCurrency(item.amount)}`).join(', ');
+                    const total = entry.spending.reduce((sum, item) => sum + item.amount, 0);
+                    const fullText = `${spendingText} (Total: ${formatCurrency(total)})`;
+                    spendingDisplay = `<span class="notes-cell" title="${fullText}">${spendingText}</span>`;
+                } else if (typeof entry.spending === 'string' && entry.spending) {
+                    // Handle old string format for backwards compatibility
+                    spendingDisplay = `<span class="notes-cell" title="${entry.spending}">${entry.spending}</span>`;
+                }
+
+                return `
+                    <tr>
+                        <td>${formatDate(entry.date)}</td>
+                        <td><strong>${formatCurrency(entry.balance)}</strong></td>
+                        <td class="${dailyClass}">
+                            ${prevEntry ? formatCurrency(dailyChange) : '-'}
+                        </td>
+                        <td class="${monthClass}">
+                            ${monthChange !== 0 ? formatCurrency(monthChange) : '-'}
+                        </td>
+                        <td>${notesDisplay}</td>
+                        <td>${spendingDisplay}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="edit-btn" onclick="editEntry(${index})">Edit</button>
+                                <button class="delete-btn" onclick="deleteEntry(${index})">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function updateGoalCards() {
+            // Display starting balance
+            if (startingBalance > 0) {
+                document.getElementById('startingBalanceDisplay').textContent = formatCurrency(startingBalance);
+            } else {
+                document.getElementById('startingBalanceDisplay').textContent = '-';
+            }
+
+            if (entries.length === 0) {
+                document.getElementById('currentBalance').textContent = '-';
+                document.getElementById('equityBuilt').textContent = '-';
+                document.getElementById('monthChange').textContent = '-';
+                document.getElementById('goalProgress').textContent = '-';
+                return;
+            }
+
+            // Current balance (most recent entry)
+            const currentBalance = entries[0].balance;
+            document.getElementById('currentBalance').textContent = formatCurrency(currentBalance);
+
+            // Equity built (starting balance - current balance)
+            if (startingBalance > 0) {
+                const equity = startingBalance - currentBalance;
+                const equityEl = document.getElementById('equityBuilt');
+                equityEl.textContent = formatCurrency(equity);
+                equityEl.className = 'value ' + (equity > 0 ? 'negative' : equity < 0 ? 'positive' : '');
+            } else {
+                document.getElementById('equityBuilt').textContent = '-';
+            }
+
+            // This month's equity (positive when balance goes down)
+            const currentMonthStart = getMonthStart(entries[0].date);
+            const currentMonthEntries = entries.filter(e => getMonthStart(e.date) === currentMonthStart);
+
+            if (currentMonthEntries.length > 1) {
+                const firstOfMonth = currentMonthEntries[currentMonthEntries.length - 1].balance;
+                const lastOfMonth = currentMonthEntries[0].balance;
+                const monthEquity = firstOfMonth - lastOfMonth; // Positive when balance decreases
+
+                const monthChangeEl = document.getElementById('monthChange');
+                monthChangeEl.textContent = formatCurrency(monthEquity);
+                monthChangeEl.className = 'value ' + (monthEquity > 0 ? 'negative' : monthEquity < 0 ? 'positive' : '');
+
+                // Goal progress (goal is to build $1000 equity per month)
+                const progressEl = document.getElementById('goalProgress');
+
+                if (monthEquity >= 1000) {
+                    progressEl.textContent = '✓ Goal Met!';
+                    progressEl.className = 'value negative';
+                } else if (monthEquity > 0) {
+                    const remaining = 1000 - monthEquity;
+                    progressEl.textContent = formatCurrency(monthEquity) + ' / $1,000';
+                    progressEl.className = 'value';
+                } else {
+                    progressEl.textContent = '$0 / $1,000';
+                    progressEl.className = 'value positive';
+                }
+            } else {
+                document.getElementById('monthChange').textContent = '-';
+                document.getElementById('goalProgress').textContent = '-';
+            }
+        }
+
+        // Initial render
+        renderTable();
+        updateGoalCards();
+    </script>
+</body>
+</html>
